@@ -1,0 +1,31 @@
+# dissProject
+Python script that outputs sound when certain accelerometer values are met.
+import os
+>>> cwd = os.getcwd()
+>>> cwd
+os.chdir('E:/project')
+os.listdir('.')         #ensures the cwd is the same as where the music downloads are saved.
+
+import numpy as np
+data = np.genfromtxt('Cond1Matrix.csv', delimiter=',') #creates matrix from csv raw data of the actigraphy accelerometer
+
+from playsound import playsound  
+playsound('drum.mp3')              #outputs the drum hit audio 
+
+flag=1    #flag variable used to control the flow of the loop below. I only want the sound to play when the flag is up(flag=1)
+
+#condition 1. when the user picks up the accelerometer and rotates it 90 degrees anti-clockwise. I used matlab to analyse the raw data from the accelerometer and picked out suitable values. Eventually I would like to use matlab to calculate 80% of the peak value and use this as the upper threshold limit. 
+
+for row in data:                               
+	if row[1]>0.8 and row[2]>-0.2 and flag==1:   #flag is up and y/z values exceed threshold. sound should play and the flag goes down.
+		playsound('drum.mp3')
+		flag=0
+	else:
+		if row[1]>0.8 and row[2]>-0.2 and flag==0:  #y/z values exceed threshold but flag is down so the sound wont play and the loop                                                         continues to the next row in the matrix. this solved the problem of the sound continuosly                                                 playing when the threshold had already been met.
+			continue
+		else:
+			if row[1]<0.8 and row[2]<-0.2 and flag==1:  #the flag is is up but the threshold hasn't been met so the loop continues
+				continue
+			else:
+				if row[1]<0.8 and row[2]<-0.2 and flag==0:  #threshold has not been met but the flag is down. so this instance will raise the flag                                                       so the sound is ready to play when threshold is met again.
+					flag=1
